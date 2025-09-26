@@ -37,6 +37,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="20"/>
                                 <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="Auto"/> <!-- Extra kolom toegevoegd voor de delete knop -->
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0" Text="{Binding Product.Name}" VerticalOptions="Center"/>
                             <Label Grid.Column="1" Text="{Binding Amount}" VerticalOptions="Center" HorizontalOptions="End" Margin="0,0,10,0"/>
@@ -46,6 +47,21 @@
                             <Grid Grid.Column="3">
                                 <Image Source="min.png" WidthRequest="15" HeightRequest="15"/>
                             </Grid>
+                            <!-- Delete knop om producten uit de boodschappenlijst te verwijderen -->
+                            <Button Grid.Column="4" 
+                                    Text="✕" 
+                                    FontSize="15"
+                                    WidthRequest="20" 
+                                    HeightRequest="20"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="Red"
+                                    TextColor="White"
+                                    Padding="0"
+                                    CornerRadius="12"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GroceryListItemsViewModel}}, Path=RemoveProductCommand}"
+                                    CommandParameter="{Binding .}"
+                                    ToolTipProperties.Text="Product verwijderen uit boodschappenlijst" />
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
@@ -54,11 +70,6 @@
 
         <Border Grid.Row="1" Grid.Column="1" Stroke="#C49B33" StrokeThickness="4" Padding="5" Margin="5" HorizontalOptions="Center">
             <StackLayout>
-                <SearchBar x:Name="ProductSearchBar"
-                           Placeholder="Zoek producten..."
-                           Text="{Binding SearchTerm, Mode=TwoWay}"
-                           SearchCommand="{Binding SearchProductsCommand}"
-                           Margin="5"/>
                 <CollectionView ItemsSource="{Binding AvailableProducts}" Margin="5" WidthRequest="300" HorizontalOptions="Start"
                     SelectionMode="Single"
                     SelectionChangedCommand="{Binding AddProductCommand}"
