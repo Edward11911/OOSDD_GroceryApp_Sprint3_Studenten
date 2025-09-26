@@ -34,9 +34,10 @@ namespace Grocery.Core.Services
             return _groceriesRepository.Add(item);
         }
 
+        // Implementatie van Delete methode in service laag
         public GroceryListItem? Delete(GroceryListItem item)
         {
-            throw new NotImplementedException();
+            return _groceriesRepository.Delete(item);
         }
 
         public GroceryListItem? Get(int id)

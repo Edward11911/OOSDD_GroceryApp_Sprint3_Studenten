@@ -6,7 +6,6 @@ using Grocery.Core.Interfaces.Services;
 using Grocery.Core.Models;
 using System.Collections.ObjectModel;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Grocery.App.ViewModels
 {
@@ -24,8 +23,6 @@ namespace Grocery.App.ViewModels
         GroceryList groceryList = new(0, "None", DateOnly.MinValue, "", 0);
         [ObservableProperty]
         string myMessage;
-        [ObservableProperty]
-        public string searchTerm; //Toegevoegd als public string met searchTerm
 
         public GroceryListItemsViewModel(IGroceryListItemsService groceryListItemsService, IProductService productService, IFileSaverService fileSaverService)
         {
@@ -61,6 +58,7 @@ namespace Grocery.App.ViewModels
             Dictionary<string, object> paramater = new() { { nameof(GroceryList), GroceryList } };
             await Shell.Current.GoToAsync($"{nameof(ChangeColorView)}?Name={GroceryList.Name}", true, paramater);
         }
+
         [RelayCommand]
         public void AddProduct(Product product)
         {
@@ -73,6 +71,21 @@ namespace Grocery.App.ViewModels
             OnGroceryListChanged(GroceryList);
         }
 
+        // RemoveProduct command om producten uit boodschappenlijst te verwijderen
+        [RelayCommand]
+        public void RemoveProduct(GroceryListItem groceryListItem)
+        {
+            if (groceryListItem == null) return;
+
+            _groceryListItemsService.Delete(groceryListItem); // Verwijderd het item uit de boodschappenlijst
+
+            // Verhoog de voorraad van het product weer met 1
+            groceryListItem.Product.Stock++;
+            _productService.Update(groceryListItem.Product);
+
+            OnGroceryListChanged(GroceryList); // Herlaad de data
+        }
+
         [RelayCommand]
         public async Task ShareGroceryList(CancellationToken cancellationToken)
         {
@@ -81,38 +94,12 @@ namespace Grocery.App.ViewModels
             try
             {
                 await _fileSaverService.SaveFileAsync("Boodschappen.json", jsonString, cancellationToken);
-
-                //Meldingen weergeven voor macOS
-                await Shell.Current.DisplayAlert("Succes", $"Boodschappenlijst is opgeslagen:\n{_fileSaverService.FilePath}", "OK");
+                await Toast.Make("Boodschappenlijst is opgeslagen.").Show(cancellationToken);
             }
             catch (Exception ex)
             {
-                await Shell.Current.DisplayAlert("Fout", $"Opslaan mislukt: {ex.Message}", "OK");
+                await Toast.Make($"Opslaan mislukt: {ex.Message}").Show(cancellationToken);
             }
         }
-
-        // Producten worden nu gezocht in zoekbalk
-        [RelayCommand]
-        private void SearchProducts()
-        {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-            {
-                GetAvailableProducts();
-                return;
-            }
-
-            var filtered = _productService.GetAll()
-                .Where(p => p.Stock > 0 &&
-                            MyGroceryListItems.All(g => g.ProductId != p.Id) &&
-                            p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            AvailableProducts.Clear();
-            foreach (var p in filtered)
-            {
-                AvailableProducts.Add(p);
-            }
-        }
-
     }
 }
