@@ -36,9 +36,16 @@ namespace Grocery.Core.Data.Repositories
             return Get(item.Id);
         }
 
+        // Implementatie van Delete methode om producten uit boodschappenlijst te verwijderen
         public GroceryListItem? Delete(GroceryListItem item)
         {
-            throw new NotImplementedException();
+            var existingItem = groceryListItems.FirstOrDefault(g => g.Id == item.Id);
+            if (existingItem != null)
+            {
+                groceryListItems.Remove(existingItem);
+                return existingItem;
+            }
+            return null;
         }
 
         public GroceryListItem? Get(int id)
