@@ -12,6 +12,8 @@ namespace Grocery.Core.Services
 {
     public class FileSaverService : IFileSaverService
     {
+        public string FilePath { get; private set; } = string.Empty;
+
         public async Task SaveFileAsync(string fileName, string content, CancellationToken cancellationToken)
         {
 #if MACCATALYST
@@ -27,6 +29,9 @@ namespace Grocery.Core.Services
         
             var window = UIApplication.SharedApplication.KeyWindow;
             var rootVC = window?.RootViewController;
+
+            FilePath = result?.FilePath;
+
             if (rootVC == null)
                 throw new Exception("No root view controller available");
         
