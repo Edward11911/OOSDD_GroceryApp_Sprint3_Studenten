@@ -15,7 +15,7 @@ namespace Grocery.App.ViewModels
         private readonly IGroceryListItemsService _groceryListItemsService;
         private readonly IProductService _productService;
         private readonly IFileSaverService _fileSaverService;
-        
+
         public ObservableCollection<GroceryListItem> MyGroceryListItems { get; set; } = [];
         public ObservableCollection<Product> AvailableProducts { get; set; } = [];
 
@@ -43,7 +43,7 @@ namespace Grocery.App.ViewModels
         {
             AvailableProducts.Clear();
             foreach (Product p in _productService.GetAll())
-                if (MyGroceryListItems.FirstOrDefault(g => g.ProductId == p.Id) == null  && p.Stock > 0)
+                if (MyGroceryListItems.FirstOrDefault(g => g.ProductId == p.Id) == null && p.Stock > 0)
                     AvailableProducts.Add(p);
         }
 
@@ -58,6 +58,7 @@ namespace Grocery.App.ViewModels
             Dictionary<string, object> paramater = new() { { nameof(GroceryList), GroceryList } };
             await Shell.Current.GoToAsync($"{nameof(ChangeColorView)}?Name={GroceryList.Name}", true, paramater);
         }
+
         [RelayCommand]
         public void AddProduct(Product product)
         {
@@ -68,6 +69,21 @@ namespace Grocery.App.ViewModels
             _productService.Update(product);
             AvailableProducts.Remove(product);
             OnGroceryListChanged(GroceryList);
+        }
+
+        // RemoveProduct command om producten uit boodschappenlijst te verwijderen
+        [RelayCommand]
+        public void RemoveProduct(GroceryListItem groceryListItem)
+        {
+            if (groceryListItem == null) return;
+
+            _groceryListItemsService.Delete(groceryListItem); // Verwijderd het item uit de boodschappenlijst
+
+            // Verhoog de voorraad van het product weer met 1
+            groceryListItem.Product.Stock++;
+            _productService.Update(groceryListItem.Product);
+
+            OnGroceryListChanged(GroceryList); // Herlaad de data
         }
 
         [RelayCommand]
@@ -85,6 +101,5 @@ namespace Grocery.App.ViewModels
                 await Toast.Make($"Opslaan mislukt: {ex.Message}").Show(cancellationToken);
             }
         }
-
     }
 }

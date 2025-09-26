@@ -11,7 +11,7 @@
         <ToolbarItem Text="Wijzig kleur" Command="{Binding ChangeColorCommand}" IconImageSource="{FontImage Glyph='&#xf30c;', Color=Black, Size=22}" />
         <ToolbarItem Text="Deel boodschappenlijst" Command="{Binding ShareGroceryListCommand}" IconImageSource="{FontImage Glyph='&#xf30c;', Color=Black, Size=22}" />
     </ContentPage.ToolbarItems>
-    
+
     <Shell.TitleView>
         <Grid>
             <Label Text="{Binding GroceryList.Name}" FontSize="Large" HorizontalOptions="Center" VerticalOptions="Center" />
@@ -37,6 +37,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="20"/>
                                 <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="Auto"/> <!-- Extra kolom toegevoegd voor de delete knop -->
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="0" Text="{Binding Product.Name}" VerticalOptions="Center"/>
                             <Label Grid.Column="1" Text="{Binding Amount}" VerticalOptions="Center" HorizontalOptions="End" Margin="0,0,10,0"/>
@@ -46,6 +47,21 @@
                             <Grid Grid.Column="3">
                                 <Image Source="min.png" WidthRequest="15" HeightRequest="15"/>
                             </Grid>
+                            <!-- Delete knop om producten uit de boodschappenlijst te verwijderen -->
+                            <Button Grid.Column="4" 
+                                    Text="✕" 
+                                    FontSize="15"
+                                    WidthRequest="20" 
+                                    HeightRequest="20"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="Red"
+                                    TextColor="White"
+                                    Padding="0"
+                                    CornerRadius="12"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:GroceryListItemsViewModel}}, Path=RemoveProductCommand}"
+                                    CommandParameter="{Binding .}"
+                                    ToolTipProperties.Text="Product verwijderen uit boodschappenlijst" />
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
