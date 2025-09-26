@@ -6,6 +6,7 @@ using Grocery.Core.Interfaces.Services;
 using Grocery.Core.Models;
 using System.Collections.ObjectModel;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Grocery.App.ViewModels
 {
@@ -23,6 +24,8 @@ namespace Grocery.App.ViewModels
         GroceryList groceryList = new(0, "None", DateOnly.MinValue, "", 0);
         [ObservableProperty]
         string myMessage;
+        [ObservableProperty]
+        public string searchTerm; //Toegevoegd als public string met searchTerm
 
         public GroceryListItemsViewModel(IGroceryListItemsService groceryListItemsService, IProductService productService, IFileSaverService fileSaverService)
         {
@@ -99,6 +102,29 @@ namespace Grocery.App.ViewModels
             catch (Exception ex)
             {
                 await Toast.Make($"Opslaan mislukt: {ex.Message}").Show(cancellationToken);
+            }
+        }
+
+        // Producten worden nu gezocht in zoekbalk
+        [RelayCommand]
+        private void SearchProducts()
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                GetAvailableProducts();
+                return;
+            }
+
+            var filtered = _productService.GetAll()
+                .Where(p => p.Stock > 0 &&
+                            MyGroceryListItems.All(g => g.ProductId != p.Id) &&
+                            p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            AvailableProducts.Clear();
+            foreach (var p in filtered)
+            {
+                AvailableProducts.Add(p);
             }
         }
     }
